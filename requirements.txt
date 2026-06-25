@@ -1,0 +1,15 @@
+# Python 3.11
+pandas
+numpy
+scikit-learn
+scipy
+matplotlib
+seaborn
+plotly
+xgboost
+prophet
+chinese-calendar
+statsmodels
+openpyxl
+jupyter
+minio
