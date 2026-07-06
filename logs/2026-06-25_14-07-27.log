@@ -1,2 +1,0 @@
-2026-06-25 14:07:27,401 - src.data.extract.data_extract - INFO - 开始执行SQL查询，limit=None
-2026-06-25 14:07:31,775 - src.data.extract.data_extract - INFO - SQL查询执行成功，返回1575行数据，列数: 4

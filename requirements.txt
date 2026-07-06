@@ -13,3 +13,4 @@ statsmodels
 openpyxl
 jupyter
 minio
+lunardate

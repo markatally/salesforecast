@@ -1,0 +1,8 @@
+feature,mape_increase_pct_mean,mape_increase_pct_std
+target_month_workdays,0.7545570898023828,0.05720503105690236
+target_month_nonworkdays,0.023138402989443297,0.038970283970264086
+target_month_weekend_days,0.0,0.0
+target_month_spring_festival_core_days,0.0,0.0
+target_month_spring_festival_days,0.0,0.0
+target_month_spring_festival_spans_adjacent_month,0.0,0.0
+target_month_lunar_holiday_days,-0.0018950822760695374,0.0017868840810833292
