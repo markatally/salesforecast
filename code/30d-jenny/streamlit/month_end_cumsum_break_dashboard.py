@@ -52,8 +52,7 @@ STABILITY_ORDER = {
 CV_STABLE_MAX = 0.20
 YOY_STABLE_MAX = 0.06
 MAX_YOY_STABLE_MAX = 0.05
-LOYO_WAPE_STABLE_MAX = 0.08
-LOYO_WAPE_WATCH_MAX = 0.20
+LOYO_WAPE_STABLE_MAX = 0.20
 TABLE_VISIBLE_ROWS = 12
 TABLE_ROW_HEIGHT = 35
 TABLE_HEADER_HEIGHT = 38
@@ -949,12 +948,11 @@ def render_contribution_stability_tab(daily: pd.DataFrame) -> None:
         MAX_YOY_STABLE_MAX,
         "最大YoY绝对变化={value}；≤{stable} 稳定，>{stable} 不稳定。",
     )
-    loyo_df = add_stability_columns(
+    loyo_df = add_binary_stability_columns(
         loyo_df,
         "LOYO-WAPE",
         LOYO_WAPE_STABLE_MAX,
-        LOYO_WAPE_WATCH_MAX,
-        "LOYO-WAPE={value}；≤{stable} 稳定，{stable}-{watch} 需观察，>{watch} 不稳定。",
+        "LOYO-WAPE={value}；≤{stable} 稳定，>{stable} 不稳定。",
     )
 
     with st.container(horizontal=True):
@@ -1058,7 +1056,7 @@ def render_contribution_stability_tab(daily: pd.DataFrame) -> None:
             "LOYO-WAPE",
             loyo_label,
             loyo_reason,
-            f"LOYO-WAPE≤{fmt_pct(LOYO_WAPE_STABLE_MAX * 100)} 为稳定，{fmt_pct(LOYO_WAPE_STABLE_MAX * 100)}-{fmt_pct(LOYO_WAPE_WATCH_MAX * 100)} 为需观察，>{fmt_pct(LOYO_WAPE_WATCH_MAX * 100)} 为不稳定。",
+            f"LOYO-WAPE≤{fmt_pct(LOYO_WAPE_STABLE_MAX * 100)} 为稳定，>{fmt_pct(LOYO_WAPE_STABLE_MAX * 100)} 为不稳定。",
         )
         st.caption(
             "每次留出一个年份，用其他年份同月同窗口贡献率中位数反推测试年份月总量，再汇总 WAPE；越低表示贡献率基准越可复用。"
