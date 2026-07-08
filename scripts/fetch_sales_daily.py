@@ -32,11 +32,11 @@ TABLE_SCOPES = [
     {
         "table": "dm.dws_dg_ph_md_fact_sales",
         "bizym_start": "202401",
-        "bizym_end": "202604",
+        "bizym_end": "202605",
     },
 ]
 
-MARKET_REPORT_ROOT = Path("/Users/mark/Git/lab/market_report")
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT_PATH = Path(__file__).resolve().parents[1] / "data" / "sales_daily.csv"
 
 
@@ -50,7 +50,9 @@ def _build_scope_sql(table: str, bizym_start: str, bizym_end: str) -> str:
         ddpmfs.bizym,
         SUBSTRING(ddpmfs.transdate, 1, 10) AS transdate,
         COUNT(DISTINCT tomdphncode) AS num_hosp,
-        SUM(ddpmfs.cnvrtdqty) AS qty
+        SUM(ddpmfs.cnvrtdqty) AS qty,
+        SUM(ddpmfs.taxamt) AS taxamt,
+        AVG(ddpmfs.price) AS avg_price
     FROM {table} ddpmfs
     WHERE projectcode = {_quote_sql(PROJECT_CODE)}
       AND prodmdmcode = {_quote_sql(PROD_MDM_CODE)}
@@ -83,12 +85,9 @@ ORDER BY bizym, transdate
 
 
 def _load_market_report_query_api():
-    if not MARKET_REPORT_ROOT.exists():
-        raise FileNotFoundError(f"market_report project not found: {MARKET_REPORT_ROOT}")
-
-    market_report_root = str(MARKET_REPORT_ROOT)
-    if market_report_root not in sys.path:
-        sys.path.insert(0, market_report_root)
+    project_root = str(PROJECT_ROOT)
+    if project_root not in sys.path:
+        sys.path.insert(0, project_root)
 
     from src.data.extract import get_df_by_sql
 
@@ -97,7 +96,7 @@ def _load_market_report_query_api():
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Fetch daily sales aggregation data through market_report's DB API."
+        description="Fetch daily sales aggregation data through the local DB query API."
     )
     parser.add_argument(
         "--output",
