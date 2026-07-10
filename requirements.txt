@@ -1,5 +1,6 @@
 # Python 3.11
 pandas
+requests
 numpy
 scikit-learn
 scipy
@@ -13,3 +14,5 @@ statsmodels
 openpyxl
 jupyter
 minio
+lunardate
+streamlit
