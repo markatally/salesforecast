@@ -1,0 +1,695 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0b8ff1" />
+    <title>MLOps 用户旅程地图</title>
+    <style>
+      :root {
+        --blue: #0b8ff1;
+        --blue-deep: #087ce0;
+        --ink: #092a4b;
+        --white: #ffffff;
+        --violet: #7650f4;
+        --mint: #70cfbd;
+        --sky: #70afea;
+        --gold: #ffc857;
+        --line: rgba(255, 255, 255, 0.88);
+        --muted: rgba(255, 255, 255, 0.74);
+      }
+
+      * { box-sizing: border-box; }
+
+      html { background: #e8f4ff; color-scheme: light; }
+
+      body {
+        margin: 0;
+        min-width: 320px;
+        color: var(--white);
+        font-family: Inter, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+      }
+
+      button { font: inherit; }
+
+      .skip-link {
+        position: fixed;
+        top: 8px;
+        left: 8px;
+        z-index: 10;
+        transform: translateY(-150%);
+        border-radius: 8px;
+        background: #fff;
+        color: var(--ink);
+        padding: 10px 14px;
+        font-weight: 700;
+      }
+
+      .skip-link:focus { transform: translateY(0); outline: 3px solid #082c57; }
+
+      .page-shell { min-height: 100dvh; background: #e8f4ff; }
+
+      .toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 20px 32px;
+        color: var(--ink);
+      }
+
+      .toolbar-note { margin: 0; color: #4a6480; font-size: 14px; }
+
+      .toolbar-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; }
+
+      .copy-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        min-height: 44px;
+        border: 0;
+        border-radius: 10px;
+        padding: 10px 17px;
+        background: #087ce0;
+        color: #fff;
+        box-shadow: 0 6px 16px rgba(8, 124, 224, 0.2);
+        cursor: pointer;
+        touch-action: manipulation;
+        transition: background-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+      }
+
+      .copy-button:hover { background: #066fc9; box-shadow: 0 8px 20px rgba(8, 124, 224, 0.28); }
+      .copy-button:active { transform: translateY(1px); }
+      .copy-button:focus-visible { outline: 3px solid #092a4b; outline-offset: 3px; }
+      .copy-button:disabled { cursor: wait; opacity: 0.72; }
+      .copy-button svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
+
+      .edit-button { background: #fff; color: #087ce0; box-shadow: inset 0 0 0 1px #b6dafa; }
+      .edit-button:hover { background: #edf7ff; box-shadow: inset 0 0 0 1px #8fc7f4; }
+      .edit-button.is-saving { background: #087ce0; color: #fff; box-shadow: 0 6px 16px rgba(8, 124, 224, 0.2); }
+      .edit-button.is-saving:hover { background: #066fc9; }
+
+      .journey-canvas {
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
+        width: min(100%, 1600px);
+        min-height: 940px;
+        margin: 0 auto 32px;
+        padding: 70px clamp(28px, 7.2vw, 116px) 52px;
+        background: var(--blue);
+      }
+
+      .journey-canvas::before,
+      .journey-canvas::after {
+        position: absolute;
+        z-index: -1;
+        content: "";
+        pointer-events: none;
+      }
+
+      .journey-canvas::before {
+        inset: 0;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 1000' preserveAspectRatio='none'%3E%3Cpath fill='%230784e8' d='M0 250C290 304 590 402 885 520C1150 626 1390 708 1600 760V1000H0Z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+      }
+
+      .journey-canvas::after {
+        inset: 0;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 1000' preserveAspectRatio='none'%3E%3Cpath fill='%23087ce0' d='M300 1000C650 902 1160 832 1600 814V1000Z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+      }
+
+      .hero {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 32px;
+      }
+
+      .eyebrow {
+        margin: 0 0 8px;
+        color: #c8e9ff;
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        max-width: 720px;
+        margin: 0;
+        font-size: clamp(31px, 3.2vw, 52px);
+        font-weight: 800;
+        letter-spacing: -0.045em;
+        line-height: 1.1;
+        text-wrap: balance;
+      }
+
+      .hero-copy { max-width: none; margin: 13px 0 0; color: var(--muted); font-size: 16px; line-height: 1.65; white-space: nowrap; }
+
+      .legend {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 10px;
+        min-width: 236px;
+        padding-top: 4px;
+        text-align: right;
+      }
+
+      .legend-title { margin: 0; font-size: 14px; font-weight: 800; }
+      .legend-list { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 7px; }
+      .legend-item { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; white-space: nowrap; }
+      .legend-dot { width: 8px; height: 8px; border-radius: 99px; background: currentColor; }
+
+      .journey-grid {
+        display: grid;
+        grid-template-columns: 140px repeat(4, minmax(0, 1fr));
+        gap: 26px;
+        align-items: stretch;
+        margin-top: 58px;
+      }
+
+      .journey-labels { display: grid; grid-template-rows: 76px repeat(4, 1fr); gap: 0; padding: 16px 0; }
+      .journey-labels > div { display: flex; align-items: center; color: #d4ecff; font-size: 13px; font-weight: 750; line-height: 1.35; }
+      .journey-labels > div:first-child { color: #fff; font-size: 14px; }
+      .journey-labels > div::before { display: inline-block; width: 38px; height: 5px; margin-right: 11px; border-radius: 99px; background: currentColor; content: ""; }
+
+      .stage {
+        position: relative;
+        display: grid;
+        grid-template-rows: 76px repeat(4, 1fr);
+        min-height: 610px;
+        overflow: hidden;
+        border-radius: 22px;
+        color: #fff;
+        box-shadow: 0 18px 26px rgba(1, 60, 119, 0.15);
+      }
+
+      .stage::before {
+        position: absolute;
+        top: 76px;
+        right: 0;
+        left: 0;
+        height: 2px;
+        background: #fff;
+        content: "";
+      }
+
+      .stage-violet { background: var(--violet); }
+      .stage-mint { background: var(--mint); }
+      .stage-sky { background: var(--sky); }
+      .stage-gold { background: var(--gold); color: #fff; }
+
+      .stage-heading { display: flex; align-items: center; justify-content: center; padding: 11px 18px 13px; color: #fff; text-align: center; }
+      .stage-number { display: block; margin-bottom: 7px; color: #fff; opacity: 1; font-size: 11px; font-weight: 800; letter-spacing: 0.1em; }
+      .stage-heading h2 { margin: 0; color: #fff; font-size: 20px; font-weight: 800; letter-spacing: -0.025em; line-height: 1.2; }
+      .stage-cell { position: relative; padding: 22px 21px 20px; }
+      .cell-kicker { display: block; margin-bottom: 1.57em; opacity: 1; font-size: 11px; font-weight: 800; letter-spacing: 0.08em; line-height: 1.57; text-transform: uppercase; }
+      .stage-cell p { margin: 0; font-size: 14px; font-weight: 600; line-height: 1.57; }
+
+      .is-editing [data-editable] { border-radius: 4px; outline: 2px dashed rgba(255, 255, 255, 0.9); outline-offset: 3px; background: rgba(255, 255, 255, 0.12); cursor: text; }
+      .is-editing .stage-gold [data-editable] { outline-color: rgba(19, 56, 96, 0.65); background: rgba(255, 255, 255, 0.32); }
+      [data-editable]:focus { outline: 3px solid #fff; outline-offset: 3px; }
+      .stage-gold [data-editable]:focus { outline-color: #133860; }
+
+      .footer-note { display: flex; align-items: center; justify-content: flex-end; gap: 24px; margin-top: 34px; color: #caeaff; font-size: 13px; line-height: 1.55; }
+      .footer-key { display: inline-flex; align-items: center; gap: 8px; font-weight: 800; white-space: nowrap; }
+      .footer-key::before { width: 31px; height: 4px; border-radius: 99px; background: #fff; content: ""; }
+
+      .toast {
+        position: fixed;
+        z-index: 20;
+        right: 24px;
+        bottom: 24px;
+        max-width: calc(100vw - 48px);
+        transform: translateY(16px);
+        border-radius: 10px;
+        padding: 12px 15px;
+        background: #092a4b;
+        color: #fff;
+        box-shadow: 0 12px 30px rgba(1, 34, 67, 0.25);
+        font-size: 14px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 180ms ease, transform 180ms ease;
+      }
+
+      .toast.is-visible { transform: translateY(0); opacity: 1; }
+
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+      }
+
+      @media (max-width: 1040px) {
+        .journey-canvas { min-height: auto; padding: 52px 34px 46px; }
+        .journey-grid { grid-template-columns: repeat(4, minmax(170px, 1fr)); gap: 16px; overflow: hidden; }
+        .journey-labels { display: none; }
+        .stage { min-height: 615px; }
+        .stage-cell { padding: 20px 16px; }
+      }
+
+      @media (max-width: 740px) {
+        .toolbar { align-items: flex-start; padding: 16px; }
+        .toolbar-note { display: none; }
+        .copy-button { flex: 1; }
+        .journey-canvas { width: 100%; margin: 0; padding: 42px 20px 30px; }
+        .hero { flex-direction: column; gap: 24px; }
+        h1 { font-size: 34px; }
+        .hero-copy { font-size: 15px; white-space: normal; }
+        .legend { align-items: flex-start; min-width: 0; padding: 0; text-align: left; }
+        .legend-list { justify-content: flex-start; }
+        .journey-grid { grid-template-columns: 1fr; gap: 16px; margin-top: 34px; overflow: visible; }
+        .stage { grid-template-rows: 76px auto; min-height: 0; border-radius: 18px; }
+        .stage-cell { min-height: 0; padding: 18px; }
+        .footer-note { flex-direction: column; align-items: flex-start; margin-top: 24px; }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#journey-map">跳至用户旅程地图</a>
+    <div class="page-shell">
+      <header class="toolbar" aria-label="页面操作">
+        <p class="toolbar-note">MLOps 标准使用场景 · 适合粘贴到方案、汇报与需求文档</p>
+        <div class="toolbar-actions">
+        <button class="copy-button edit-button" id="edit-save" type="button" aria-label="编辑旅程地图文字">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+          <span>编辑文字</span>
+        </button>
+        <button class="copy-button" id="copy-image" type="button" aria-label="复制用户旅程地图为 PNG 图片">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg>
+          <span>复制为图片</span>
+        </button>
+        </div>
+      </header>
+
+      <main id="journey-map" class="journey-canvas" aria-labelledby="journey-title">
+        <section class="hero" aria-label="地图说明">
+          <div>
+            <p class="eyebrow" data-editable>MLOps Journey Map</p>
+            <h1 id="journey-title" data-editable>标准 MLOps 用户旅程地图</h1>
+            <p class="hero-copy" data-editable>以端到端模型交付为主线，梳理不同角色如何将数据、算法与工程能力沉淀为稳定、可复用、可治理的机器学习服务</p>
+          </div>
+          <aside class="legend" aria-label="角色说明">
+            <p class="legend-title" data-editable>核心用户角色</p>
+            <div class="legend-list">
+              <span class="legend-item"><i class="legend-dot" style="color:#c7b9ff"></i><span data-editable>数据科学家</span></span>
+              <span class="legend-item"><i class="legend-dot" style="color:#b8f1e4"></i><span data-editable>算法工程师</span></span>
+              <span class="legend-item"><i class="legend-dot" style="color:#cfe8ff"></i><span data-editable>机器学习工程师</span></span>
+              <span class="legend-item"><i class="legend-dot" style="color:#ffe7a7"></i><span data-editable>ML 运维工程师</span></span>
+            </div>
+          </aside>
+        </section>
+
+        <section class="journey-grid" aria-label="四阶段 MLOps 用户旅程">
+          <div class="journey-labels" aria-hidden="true">
+            <div>旅程维度</div><div>核心任务</div><div>关键动作</div><div>常见阻塞</div><div>平台期望</div>
+          </div>
+
+          <article class="stage stage-violet" aria-labelledby="stage-1-title">
+            <header class="stage-heading"><div><span class="stage-number" data-editable>01 / DISCOVER</span><h2 id="stage-1-title" data-editable>数据理解与特征设计</h2></div></header>
+            <div class="stage-cell"><span class="cell-kicker" data-editable>核心任务</span><p data-editable>定义业务问题、分析数据质量，设计可解释且可复用的候选特征</p></div>
+            <div class="stage-cell"><span class="cell-kicker" data-editable>关键动作</span><p data-editable>数据探索、样本构建、特征提取、基线假设与实验方案设计</p></div>
+            <div class="stage-cell"><span class="cell-kicker" data-editable>常见阻塞</span><p data-editable>数据口径不一致、数据集无快照、特征逻辑散落在个人脚本中</p></div>
+            <div class="stage-cell"><span class="cell-kicker" data-editable>平台期望</span><p data-editable>统一数据接入、数据集版本与特征注册，支持检索、血缘与复用</p></div>
+          </article>
+
+          <article class="stage stage-mint" aria-labelledby="stage-2-title">
+            <header class="stage-heading"><div><span class="stage-number" data-editable>02 / BUILD</span><h2 id="stage-2-title" data-editable>模型开发与实验验证</h2></div></header>
+            <div class="stage-cell"><span class="cell-kicker" data-editable>核心任务</span><p data-editable>构建模型方案，完成训练、调参、评估及可部署模型产物交付</p></div>
+            <div class="stage-cell"><span class="cell-kicker" data-editable>关键动作</span><p data-editable>模型选型、算法优化、参数搜索、指标对比与误差分析</p></div>
+            <div class="stage-cell"><span class="cell-kicker" data-editable>常见阻塞</span><p data-editable>模型与实验记录分散、本地环境不稳定、评估标准依赖人工判断</p></div>
+            <div class="stage-cell"><span class="cell-kicker" data-editable>平台期望</span><p data-editable>实验跟踪、模型注册、标准评估模板与质量阈值校验能力</p></div>
+          </article>
+
+          <article class="stage stage-sky" aria-labelledby="stage-3-title">
+            <header class="stage-heading"><div><span class="stage-number" data-editable>03 / ENGINEER</span><h2 id="stage-3-title" data-editable>流水线工程化与训练</h2></div></header>
+            <div class="stage-cell"><span class="cell-kicker" data-editable>核心任务</span><p data-editable>将模型代码产品化，构建可重复执行、可扩展的训练与特征流水线</p></div>
+            <div class="stage-cell"><span class="cell-kicker" data-editable>关键动作</span><p data-editable>代码重构、Pipeline 编排、分布式训练、镜像构建与性能优化</p></div>
+            <div class="stage-cell"><span class="cell-kicker" data-editable>常见阻塞</span><p data-editable>Notebook 人工串联、依赖难锁定、算力资源有限且训练难复现</p></div>
+            <div class="stage-cell"><span class="cell-kicker" data-editable>平台期望</span><p data-editable>标准 SDK、可编排 DAG、统一运行环境、训练资源与任务调度</p></div>
+          </article>
+
+          <article class="stage stage-gold" aria-labelledby="stage-4-title">
+            <header class="stage-heading"><div><span class="stage-number" data-editable>04 / OPERATE</span><h2 id="stage-4-title" data-editable>发布运维与持续治理</h2></div></header>
+            <div class="stage-cell"><span class="cell-kicker" data-editable>核心任务</span><p data-editable>保障模型服务稳定运行，并持续管理资源、权限、成本与风险</p></div>
+            <div class="stage-cell"><span class="cell-kicker" data-editable>关键动作</span><p data-editable>CI/CD、发布回滚、GPU 调度、监控告警、漂移检测与权限治理</p></div>
+            <div class="stage-cell"><span class="cell-kicker" data-editable>常见阻塞</span><p data-editable>手工发布和回滚、日志分散、无资源配额与服务 SLA 监控</p></div>
+            <div class="stage-cell"><span class="cell-kicker" data-editable>平台期望</span><p data-editable>一键部署、在线推理、可观测运维、多租户隔离与成本计量</p></div>
+          </article>
+        </section>
+
+        <footer class="footer-note">
+          <span class="footer-key" data-editable>端到端闭环 · 可复用 · 可治理</span>
+        </footer>
+      </main>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script>
+      const copyButton = document.getElementById('copy-image');
+      const editSaveButton = document.getElementById('edit-save');
+      const canvasTarget = document.getElementById('journey-map');
+      const toast = document.getElementById('toast');
+      const storageKey = 'mlops-user-journey-map-edits-v2';
+      const html2canvasUrl = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+      let toastTimer;
+      let html2canvasLoader;
+
+      function showToast(message) {
+        toast.textContent = message;
+        toast.classList.add('is-visible');
+        window.clearTimeout(toastTimer);
+        toastTimer = window.setTimeout(() => toast.classList.remove('is-visible'), 3200);
+      }
+
+      function inlineStyles(source, clone) {
+        const sourceNodes = [source, ...source.querySelectorAll('*')];
+        const cloneNodes = [clone, ...clone.querySelectorAll('*')];
+        sourceNodes.forEach((node, index) => {
+          const computed = window.getComputedStyle(node);
+          const target = cloneNodes[index];
+          if (!target) return;
+          const css = Array.from(computed).map((property) => `${property}:${computed.getPropertyValue(property)};`).join('');
+          target.setAttribute('style', css);
+        });
+      }
+
+      function editableNodes() {
+        return [...canvasTarget.querySelectorAll('[data-editable]')];
+      }
+
+      function restoreEdits() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(storageKey));
+          if (!Array.isArray(saved)) return;
+          editableNodes().forEach((node, index) => {
+            if (typeof saved[index] === 'string') node.textContent = saved[index];
+          });
+        } catch (error) {
+          console.warn('无法恢复已保存的编辑内容', error);
+        }
+      }
+
+      function persistEdits() {
+        try {
+          localStorage.setItem(storageKey, JSON.stringify(editableNodes().map((node) => node.textContent.trim())));
+        } catch (error) {
+          console.warn('无法保存编辑内容', error);
+        }
+      }
+
+      function setEditing(isEditing) {
+        canvasTarget.classList.toggle('is-editing', isEditing);
+        editableNodes().forEach((node) => node.setAttribute('contenteditable', String(isEditing)));
+        editSaveButton.classList.toggle('is-saving', isEditing);
+        editSaveButton.setAttribute('aria-label', isEditing ? '保存旅程地图文字' : '编辑旅程地图文字');
+        editSaveButton.querySelector('span').textContent = isEditing ? '保存修改' : '编辑文字';
+      }
+
+      function renderToSvgBlob() {
+        const clone = canvasTarget.cloneNode(true);
+        clone.classList.remove('is-editing');
+        clone.querySelectorAll('[contenteditable]').forEach((node) => node.removeAttribute('contenteditable'));
+        inlineStyles(canvasTarget, clone);
+        const rect = canvasTarget.getBoundingClientRect();
+        const serialized = new XMLSerializer().serializeToString(clone);
+        const styleSheet = document.querySelector('style').textContent;
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${Math.ceil(rect.width)}" height="${Math.ceil(rect.height)}" viewBox="0 0 ${Math.ceil(rect.width)} ${Math.ceil(rect.height)}"><foreignObject width="100%" height="100%"><div xmlns="http://www.w3.org/1999/xhtml"><style>${styleSheet}</style>${serialized}</div></foreignObject></svg>`;
+        return new Blob([svg], { type: 'image/svg+xml' });
+      }
+
+      function drawRoundedRect(context, x, y, width, height, radius, fill) {
+        context.beginPath();
+        context.roundRect(x, y, width, height, radius);
+        context.fillStyle = fill;
+        context.fill();
+      }
+
+      function px(value, fallback) {
+        const parsed = Number.parseFloat(value);
+        return Number.isFinite(parsed) ? parsed : fallback;
+      }
+
+      function drawWrappedText(context, text, rect, style, origin) {
+        const fontSize = px(style.fontSize, 16);
+        const lineHeight = px(style.lineHeight, fontSize * 1.4);
+        context.font = `${style.fontStyle} ${style.fontWeight} ${fontSize}px ${style.fontFamily}`;
+        context.fillStyle = style.color;
+        context.globalAlpha = Number.parseFloat(style.opacity) || 1;
+        context.textBaseline = 'alphabetic';
+        context.textAlign = style.textAlign === 'center' ? 'center' : style.textAlign === 'right' ? 'right' : 'left';
+        const maxWidth = Math.max(1, rect.width);
+        const lines = [];
+        text.split(/\n/).forEach((paragraph) => {
+          let line = '';
+          for (const character of paragraph) {
+            const next = line + character;
+            if (line && context.measureText(next).width > maxWidth) {
+              lines.push(line);
+              line = character;
+            } else {
+              line = next;
+            }
+          }
+          if (line || !paragraph) lines.push(line);
+        });
+        const x = style.textAlign === 'center' ? rect.left - origin.left + rect.width / 2 : style.textAlign === 'right' ? rect.right - origin.left : rect.left - origin.left;
+        let y = rect.top - origin.top + fontSize + Math.max(0, (lineHeight - fontSize) / 2);
+        lines.forEach((line) => {
+          context.fillText(line, x, y);
+          y += lineHeight;
+        });
+        context.globalAlpha = 1;
+      }
+
+      function loadHtml2Canvas() {
+        if (window.html2canvas) return Promise.resolve(window.html2canvas);
+        if (html2canvasLoader) return html2canvasLoader;
+        html2canvasLoader = new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = html2canvasUrl;
+          script.async = true;
+          script.onload = () => window.html2canvas ? resolve(window.html2canvas) : reject(new Error('html2canvas 未能初始化'));
+          script.onerror = () => reject(new Error('无法加载图片渲染组件'));
+          document.head.append(script);
+        });
+        return html2canvasLoader;
+      }
+
+      function drawJourneyBackground(context, width, height) {
+        const scaleX = width / 1600;
+        const scaleY = height / 1000;
+        const point = (x, y) => [x * scaleX, y * scaleY];
+
+        context.fillStyle = '#0b8ff1';
+        context.fillRect(0, 0, width, height);
+
+        context.beginPath();
+        context.moveTo(...point(0, 250));
+        context.bezierCurveTo(...point(290, 304), ...point(590, 402), ...point(885, 520));
+        context.bezierCurveTo(...point(1150, 626), ...point(1390, 708), ...point(1600, 760));
+        context.lineTo(...point(1600, 1000));
+        context.lineTo(...point(0, 1000));
+        context.closePath();
+        context.fillStyle = '#0784e8';
+        context.fill();
+
+        context.beginPath();
+        context.moveTo(...point(300, 1000));
+        context.bezierCurveTo(...point(650, 902), ...point(1160, 832), ...point(1600, 814));
+        context.lineTo(...point(1600, 1000));
+        context.closePath();
+        context.fillStyle = '#087ce0';
+        context.fill();
+      }
+
+      async function renderToPngBlob() {
+        const html2canvas = await loadHtml2Canvas();
+        const renderedCanvas = await html2canvas(canvasTarget, {
+          backgroundColor: null,
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          onclone: (documentClone) => {
+            const clonedMap = documentClone.getElementById('journey-map');
+            clonedMap?.classList.remove('is-editing');
+            clonedMap?.style.setProperty('background', 'transparent', 'important');
+            const exportStyle = documentClone.createElement('style');
+            exportStyle.textContent = '#journey-map::before, #journey-map::after { display: none !important; }';
+            documentClone.head.append(exportStyle);
+            documentClone.querySelectorAll('[contenteditable]').forEach((node) => node.removeAttribute('contenteditable'));
+          },
+        });
+        const finalCanvas = document.createElement('canvas');
+        finalCanvas.width = renderedCanvas.width;
+        finalCanvas.height = renderedCanvas.height;
+        const finalContext = finalCanvas.getContext('2d');
+        if (!finalContext) throw new Error('Canvas is unavailable');
+        drawJourneyBackground(finalContext, finalCanvas.width, finalCanvas.height);
+        finalContext.drawImage(renderedCanvas, 0, 0);
+        const renderedBlob = await new Promise((resolve) => finalCanvas.toBlob(resolve, 'image/png'));
+        if (!renderedBlob) throw new Error('PNG conversion failed');
+        return renderedBlob;
+      }
+
+      async function renderToFallbackPngBlob() {
+        const targetRect = canvasTarget.getBoundingClientRect();
+        const scale = 2;
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.ceil(targetRect.width * scale);
+        canvas.height = Math.ceil(targetRect.height * scale);
+        const context = canvas.getContext('2d');
+        if (!context) throw new Error('Canvas is unavailable');
+        context.scale(scale, scale);
+
+        drawJourneyBackground(context, targetRect.width, targetRect.height);
+
+        canvasTarget.querySelectorAll('.stage').forEach((stage) => {
+          const rect = stage.getBoundingClientRect();
+          const style = window.getComputedStyle(stage);
+          const x = rect.left - targetRect.left;
+          const y = rect.top - targetRect.top;
+          drawRoundedRect(context, x, y, rect.width, rect.height, px(style.borderTopLeftRadius, 22), style.backgroundColor);
+          const heading = stage.querySelector('.stage-heading').getBoundingClientRect();
+          context.fillStyle = '#fff';
+          context.fillRect(x, heading.bottom - targetRect.top - 1, rect.width, 2);
+        });
+
+        canvasTarget.querySelectorAll('.journey-labels > div').forEach((label) => {
+          const rect = label.getBoundingClientRect();
+          const style = window.getComputedStyle(label);
+          const x = rect.left - targetRect.left;
+          const y = rect.top - targetRect.top + rect.height / 2 - 2;
+          context.fillStyle = style.color;
+          context.fillRect(x, y, 38, 5);
+          drawWrappedText(context, label.textContent.trim(), { left: rect.left + 49, right: rect.right, top: rect.top, bottom: rect.bottom, width: rect.width - 49, height: rect.height }, style, targetRect);
+        });
+
+        canvasTarget.querySelectorAll('.legend-dot').forEach((dot) => {
+          const rect = dot.getBoundingClientRect();
+          const style = window.getComputedStyle(dot);
+          context.beginPath();
+          context.fillStyle = style.color;
+          context.arc(rect.left - targetRect.left + rect.width / 2, rect.top - targetRect.top + rect.height / 2, rect.width / 2, 0, Math.PI * 2);
+          context.fill();
+        });
+
+        canvasTarget.querySelectorAll('[data-editable]').forEach((node) => {
+          const rect = node.getBoundingClientRect();
+          if (!node.textContent.trim() || rect.width === 0 || rect.height === 0) return;
+          drawWrappedText(context, node.textContent.trim(), rect, window.getComputedStyle(node), targetRect);
+        });
+
+        const footerKey = canvasTarget.querySelector('.footer-key');
+        if (footerKey) {
+          const rect = footerKey.getBoundingClientRect();
+          context.fillStyle = '#fff';
+          context.fillRect(rect.left - targetRect.left - 39, rect.top - targetRect.top + rect.height / 2 - 2, 31, 4);
+        }
+
+        const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+        if (!blob) throw new Error('PNG conversion failed');
+        return blob;
+      }
+
+      async function legacyImageCopy(blob) {
+        const imageUrl = URL.createObjectURL(blob);
+        const image = new Image();
+        image.alt = '';
+        image.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0;pointer-events:none;';
+        const loaded = new Promise((resolve, reject) => { image.onload = resolve; image.onerror = reject; });
+        image.src = imageUrl;
+        document.body.append(image);
+        try {
+          await loaded;
+          const selection = window.getSelection();
+          const range = document.createRange();
+          range.selectNode(image);
+          selection.removeAllRanges();
+          selection.addRange(range);
+          return document.execCommand('copy');
+        } finally {
+          window.getSelection()?.removeAllRanges();
+          image.remove();
+          URL.revokeObjectURL(imageUrl);
+        }
+      }
+
+      function downloadImage(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        link.click();
+        window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+
+      async function copyAsImage() {
+        if (canvasTarget.classList.contains('is-editing')) {
+          persistEdits();
+          setEditing(false);
+        }
+        copyButton.disabled = true;
+        copyButton.querySelector('span').textContent = '正在生成…';
+        try {
+          const blob = await renderToPngBlob();
+          const pngSupported = window.ClipboardItem?.supports?.('image/png') ?? true;
+          if (!navigator.clipboard?.write || !window.ClipboardItem || !pngSupported) throw new Error('PNG clipboard API is unavailable');
+          await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+          showToast('已复制 PNG 图片，可直接粘贴到文档或演示稿');
+        } catch (primaryError) {
+          try {
+            let blob;
+            try {
+              blob = await renderToPngBlob();
+            } catch (renderError) {
+              console.warn('DOM 图片渲染失败，使用兼容绘制模式', renderError);
+              blob = await renderToFallbackPngBlob();
+            }
+            if (await legacyImageCopy(blob)) {
+              showToast('已通过兼容模式复制 PNG 图片');
+            } else {
+              downloadImage(blob, 'mlops-user-journey-map.png');
+              showToast('浏览器阻止图片写入剪贴板，已下载 PNG 图片');
+            }
+          } catch (fallbackError) {
+            showToast('图片生成失败，请刷新页面后重试');
+            console.error('Image copy failed', primaryError, fallbackError);
+          }
+        } finally {
+          copyButton.disabled = false;
+          copyButton.querySelector('span').textContent = '复制为图片';
+        }
+      }
+
+      editSaveButton.addEventListener('click', () => {
+        const isEditing = canvasTarget.classList.contains('is-editing');
+        if (isEditing) {
+          persistEdits();
+          setEditing(false);
+          showToast('修改已保存到当前浏览器');
+        } else {
+          setEditing(true);
+          showToast('现在可以直接编辑地图中的文字');
+        }
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 's' && canvasTarget.classList.contains('is-editing')) {
+          event.preventDefault();
+          persistEdits();
+          setEditing(false);
+          showToast('修改已保存到当前浏览器');
+        }
+      });
+
+      restoreEdits();
+      copyButton.addEventListener('click', copyAsImage);
+    </script>
+  </body>
+</html>
