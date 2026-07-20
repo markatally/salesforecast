@@ -8,7 +8,7 @@
 
 ## 数据
 
-- 默认输入：`../../data/sales_daily.csv`
+- 默认输入：仓库根目录动态定位后的 `data/sales_30d_daily.csv`
 - 必需字段：`bizym`, `transdate`, `qty`, `num_hosp`
 - `qty` 是日销量，`num_hosp` 是当天覆盖/发生销售的医院数
 - 缺失日期会补齐；缺失 `qty` / `num_hosp` 按 0 处理；负数会截断为 0

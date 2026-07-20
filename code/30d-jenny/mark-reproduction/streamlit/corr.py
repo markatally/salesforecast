@@ -30,7 +30,7 @@ except Exception:  # pragma: no cover - app works with a weekday fallback.
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_DAILY_PATH = REPO_ROOT / "data" / "sales_daily.csv"
+DEFAULT_DAILY_PATH = REPO_ROOT / "data" / "sales_30d_daily.csv"
 
 GRAIN_OPTIONS = ["年", "月"]
 VALUE_TYPE_OPTIONS = ["统计值", "环比值", "同比值"]

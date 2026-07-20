@@ -170,9 +170,10 @@ class SalesForecastAPI:
         df = df_raw.copy()
         df['prodmdmcode'] = df['prodmdmcode'].astype(str)
         df = df[df['prodmdmcode'].str.contains('170', na=False)].copy()
+        qty_col = 'cnvrtdqty' if 'cnvrtdqty' in df.columns else 'qty'
         df_sales = pd.DataFrame()
         df_sales['date_ym'] = pd.to_datetime(df['bizym'], format='%Y%m')
-        df_sales['qty'] = pd.to_numeric(df['cnvrtdqty'], errors='coerce')
+        df_sales['qty'] = pd.to_numeric(df[qty_col], errors='coerce')
         return self.forecast(df_sales=df_sales)
 
     def forecast_171_from_raw(self, df_raw: pd.DataFrame) -> pd.DataFrame:
@@ -184,11 +185,12 @@ class SalesForecastAPI:
         df = df[df['prodmdmcode'].str.contains('171', na=False)].copy()
         if df.empty:
             raise ValueError("No records found for spec 171 in raw data")
-        if 'bizym' not in df.columns or 'cnvrtdqty' not in df.columns:
-            raise ValueError("Raw data must contain 'bizym' and 'cnvrtdqty' columns for spec 171")
+        qty_col = 'cnvrtdqty' if 'cnvrtdqty' in df.columns else 'qty'
+        if 'bizym' not in df.columns or qty_col not in df.columns:
+            raise ValueError("Raw data must contain 'bizym' and either 'cnvrtdqty' or 'qty' for spec 171")
 
         df['date_ym'] = pd.to_datetime(df['bizym'], format='%Y%m')
-        df['qty'] = pd.to_numeric(df['cnvrtdqty'], errors='coerce')
+        df['qty'] = pd.to_numeric(df[qty_col], errors='coerce')
 
         if 'tophncode' not in df.columns:
             df['tophncode'] = 'UNKNOWN'

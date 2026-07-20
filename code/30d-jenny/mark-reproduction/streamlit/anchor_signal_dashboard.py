@@ -38,8 +38,7 @@ except Exception:  # pragma: no cover - dashboard degrades gracefully.
 warnings.filterwarnings("ignore")
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_DAILY_PATH = REPO_ROOT / "data" / "sales_daily.csv"
-ESSENTIALE_DAILY_PATH = REPO_ROOT / "code" / "30d-jenny" / "Essentiale-daily.csv"
+DEFAULT_DAILY_PATH = REPO_ROOT / "data" / "sales_30d_daily.csv"
 MONTH_ORDER = list(range(1, 13))
 DEFAULT_ANCHORS = [10, 5]
 DEFAULT_NATURAL_DAY_WINDOWS = [5, 10]
@@ -1361,11 +1360,11 @@ with st.sidebar:
     st.header("1. 数据与范围")
     source_name = st.radio(
         "数据源",
-        ["sales_daily.csv", "Essentiale-daily.csv"],
+        ["sales_30d_daily.csv"],
         index=0,
-        format_func=lambda x: "默认 data/sales_daily.csv" if x == "sales_daily.csv" else "30d-jenny/Essentiale-daily.csv",
+        format_func=lambda _: "data/sales_30d_daily.csv",
     )
-    data_path = DEFAULT_DAILY_PATH if source_name == "sales_daily.csv" else ESSENTIALE_DAILY_PATH
+    data_path = DEFAULT_DAILY_PATH
     start_yyyymm = st.text_input("START_YYYYMM", value="202201")
     end_yyyymm = st.text_input("END_YYYYMM（空=到数据末尾）", value="")
 

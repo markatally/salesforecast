@@ -1,0 +1,96 @@
+# Sellin Forecating Config
+
+# 项目基础配置
+project:
+  name: "sellin_forecasting"
+  version: "1.0.0"
+  random_seed: 42
+  verbose: true
+
+# 目标信息
+info:
+  tar_prod: "Dupixent"
+  tar_ym: 202601
+  tar_mtd: 5
+
+# 列名映射（各模块共用）
+columns:
+  bizym: "bizym"
+  date: "transdate"
+  prod_code: "prodmdmcode"
+  from_code: "frommdphncode" # 用于DTP挂靠
+  from_name: "frommdphnname"
+  term_code: "tomdmcode"
+  term_name: "toedivndrnm"
+  qty: "qty"
+
+data:
+  # 数据导入模块配置
+  retrieve:
+    source: "csv"
+    # ==== ClickHouse 参数 ====
+    clickhouse_url: "clickhouse+http://report:-kfg(JKNd3ovd@192.168.16.131:8123/dm?socket_timeout=600000"
+    proj_code: ["PR00003"]
+    prod_code: ["162", "169", "193"]
+    from_type: ["经销商", "零售"]
+    to_type: ["医院"]
+    to_type_field: "tomdmtype2"
+    proj_sales_table: "sarx_ads.ads_sarx_sales"
+    # ==== CSV 参数 ====
+    raw_data_path: "../data/dupi.csv"
+    parse_dates: true
+    usecols: ["bizym", "tomdmcode", "qty"]
+
+  # 数据清洗模块配置
+  clean:
+    # ==== 功能开关 ====
+    enable_missing: false
+    enable_outlier: false
+    enable_product_fusion: false
+    enable_return: false
+    enable_dtp: false
+    enable_time_filter: true
+    enable_inst_filter: true
+    # ==== 缺失值 ====
+    missing_method: "zero"
+    # ==== 异常值检测 ====
+    outlier_detect: "iqr"
+    iqr_threshold: 1.5
+    iqr_window_size: 12
+    zscore_threshold: 3.0
+    lower_percentile: 0.01
+    upper_percentile: 0.99
+    # ==== 异常值处理 ====
+    outlier_handle: "clip"
+    smooth_window_size: 5
+    # ==== 多品规融合 ====
+    fusion_method: "sum"
+    conversion_factors:
+      "162": 1.0,
+      "169": 1.0,
+      "193": 1.0,
+    # ==== 时间筛选 ====
+    start_ym: 202401
+    end_ym: null
+    # ==== 终端筛选 ====
+    window_months: 12
+    # ==== DTP挂靠 ====
+    from_type_field: "frommdmtype1"
+    inst_type_field: "tomdmtype1"
+    dtp_type_value: "零售"
+    hsp_type_value: "医院"
+
+prep:
+  # 特征工程模块配置
+  feature:
+    jump_ym: [202401, 202403, 202409, 202411, 202501, 202503, 202509, 202511, 202601, 202603]
+    drop_ym: [202402, 202404, 202410, 202502, 202504, 202510, 202602]
+    
+  # 数据分割模块配置
+  split:
+
+# 日志配置
+logger:
+  name: "forecaster"
+  level: "INFO"
+  log_dir: "logs/"
